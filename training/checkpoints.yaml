@@ -1,0 +1,26 @@
+# Mentor checkpoint configuration
+# review_type: auto | mentor
+#
+# auto: agent reviews and approves automatically
+# mentor: agent reviews first, then sets status to awaiting_mentor
+#         mentor must create trainees/<name>/reviews/stage-<id>-review.md
+#         with "approved: true" to pass the stage
+
+stages:
+  1: auto
+  2: auto
+  3: auto
+  4: auto
+  5: auto
+  6: auto
+  7: mentor    # 畢業關卡，需 mentor 確認
+  8: auto
+
+# Mentor review file format:
+# ---
+# stage: 7
+# approved: true
+# reviewer: "<mentor name>"
+# date: "YYYY-MM-DD"
+# ---
+# <review comments>

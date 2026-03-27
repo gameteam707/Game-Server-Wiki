@@ -1,0 +1,142 @@
+version: 1
+graduation_required: [1, 2, 3, 4, 5, 7]
+
+stages:
+  - id: 1
+    name: "全局觀"
+    type: quiz
+    required: true
+    chapters: ["00", "01", "02", "03"]
+    pass_criteria:
+      core_questions: 80
+      extension_questions: 60
+
+  - id: 2
+    name: "核心分層"
+    type: quiz
+    required: true
+    chapters: ["04", "05", "06", "07"]
+    pass_criteria:
+      core_questions: 80
+      extension_questions: 60
+
+  - id: 3
+    name: "基礎實作"
+    type: implementation
+    required: true
+    tasks:
+      - id: "3-1"
+        name: "建立 domain entity（Item + ValueObject）"
+        description: "在練習專案中建立 Item entity，包含 Name, Description, Price (float64), Status (ItemStatus) 欄位。Status 使用自訂型別 + 常數（active/inactive）。不可有任何 struct tag。"
+        acceptance:
+          - "檔案位於 internal/domain/entity/item.go"
+          - "Item struct 無任何 json/bson tag"
+          - "ItemStatus 為自訂型別，有 Active/Inactive 常數"
+      - id: "3-2"
+        name: "建立 create_item usecase + contract + ports"
+        description: "建立 create_item usecase，包含 contract.go（UseCase 介面 + CreateCommand + CreateResult）、ports/repository.go（ItemRepository 介面）、uc.go（實作）。UseCase 應檢查 Name 不可為空。"
+        acceptance:
+          - "目錄結構：internal/usecase/create_item/{contract.go, uc.go, ports/repository.go}"
+          - "CreateCommand 使用業務語言，無 json tag"
+          - "UseCase 透過 ports.ItemRepository 介面操作，不直接依賴 MongoDB"
+          - "NewCreateItemUseCase 接收介面、回傳介面"
+      - id: "3-3"
+        name: "建立 HTTP handler + DTO + 路由"
+        description: "建立 item_handler.go、dto/request/item.go、dto/response/item.go。Handler 的 Create 方法：解析 JSON → 轉換為 Command → 呼叫 UseCase → 回傳 Response DTO。在 server.go 中註冊路由 POST /api/v1/items。"
+        acceptance:
+          - "Request DTO 有 json tag 和 binding 驗證"
+          - "Response DTO 有 FromEntity 轉換函式"
+          - "Handler 不包含業務邏輯"
+          - "路由已註冊在 server.go"
+      - id: "3-4"
+        name: "手動測試 API 可正常呼叫"
+        description: "啟動服務，用 curl 或 Postman 發送 POST /api/v1/items，確認回傳正確的 JSON 回應。此階段可以用 in-memory 假實作（stub）來滿足 ItemRepository 介面。"
+        acceptance:
+          - "服務可啟動無 panic"
+          - "POST /api/v1/items 回傳 201 + JSON body"
+    review: auto
+    checkpoint: false
+
+  - id: 4
+    name: "橫切關注點"
+    type: quiz
+    required: true
+    chapters: ["08", "09", "10", "11"]
+    pass_criteria:
+      core_questions: 80
+      extension_questions: 60
+
+  - id: 5
+    name: "進階實作"
+    type: implementation
+    required: true
+    tasks:
+      - id: "5-1"
+        name: "實作 MongoDB repository"
+        description: "建立 adapter/out/repository/mongo/item_repo.go，實作 ports.ItemRepository 介面。包含 itemDocument struct（有 bson tag）和 toDocument/toEntity 轉換函式。實作 Create、FindByID 方法。"
+        acceptance:
+          - "itemDocument 有 bson tag，與 entity.Item 分離"
+          - "有 toDocument 和 toEntity 轉換函式"
+          - "NewItemRepository 回傳 ports.ItemRepository 介面"
+      - id: "5-2"
+        name: "加入 DI container 組裝所有元件"
+        description: "建立 infrastructure/di/container.go，按照由內而外的順序組裝：Repository → UseCase → Handler。Container struct 暴露 Handler 給 Router 使用。"
+        acceptance:
+          - "組裝順序正確：Repository → UseCase → Handler"
+          - "所有依賴透過建構函式注入"
+          - "main.go 使用 Container 啟動服務"
+      - id: "5-3"
+        name: "完成 CRUD usecase（list, get, update, delete）"
+        description: "為 Item 新增 list_items、get_item、update_item、delete_item 四個 usecase。每個都有 contract.go + uc.go。更新 ItemRepository 介面加入 List、FindByID、Update、Delete 方法。更新 Handler 加入對應路由。"
+        acceptance:
+          - "4 個新 usecase 各有 contract.go + uc.go"
+          - "ItemRepository 介面有完整 CRUD 方法"
+          - "路由：GET /items, GET /items/:id, PUT /items/:id, DELETE /items/:id"
+      - id: "5-4"
+        name: "加 middleware（request logging, error handling）"
+        description: "建立 adapter/in/http/middleware/ 目錄，加入 request_logger.go（記錄每個請求的 method、path、status、duration）和 error_handler.go（統一 panic recovery + 錯誤格式）。在 server.go 中套用。"
+        acceptance:
+          - "每個請求都有結構化日誌輸出"
+          - "Panic 會被 recovery 攔截，回傳 500 JSON"
+          - "Middleware 套用在路由群組上"
+    review: auto
+    checkpoint: false
+
+  - id: 6
+    name: "營運面"
+    type: quiz
+    required: false
+    chapters: ["12", "13"]
+    pass_criteria:
+      core_questions: 80
+      extension_questions: 60
+
+  - id: 7
+    name: "測試"
+    type: mixed
+    required: true
+    chapters: ["14"]
+    tasks:
+      - id: "7-1"
+        name: "為 create_item usecase 寫 unit test（mock repo）"
+        description: "在 usecase/create_item/uc_test.go 中，手寫 mockItemRepository，測試：成功建立、Name 為空時回錯誤。使用 AAA 模式。"
+        acceptance:
+          - "Mock 實作 ports.ItemRepository 介面"
+          - "至少 2 個測試案例（成功 + 驗證失敗）"
+          - "go test 通過"
+      - id: "7-2"
+        name: "為 MongoDB repository 寫 integration test"
+        description: "在 adapter/out/repository/mongo/item_repo_integration_test.go 中，使用真實的 MongoDB（docker-compose 提供）測試 Create + FindByID 的完整流程。"
+        acceptance:
+          - "測試連接真實 MongoDB"
+          - "測試 Create → FindByID 的往返"
+          - "測試後清理資料"
+    review: auto
+    checkpoint: true
+    checkpoint_review: mentor
+
+  - id: 8
+    name: "學習路線"
+    type: reading
+    required: false
+    chapters: ["15"]
