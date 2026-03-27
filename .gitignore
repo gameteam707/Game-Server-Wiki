@@ -1,0 +1,7 @@
+# Practice project repos are outside this repo
+# but ensure no OS/editor artifacts are committed
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
