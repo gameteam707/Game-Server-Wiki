@@ -1,0 +1,30 @@
+chapter: "14"
+title: "測試策略"
+questions:
+  - id: "14-core-1"
+    type: concept
+    question: "測試金字塔中，為什麼 Unit Test 應該最多、E2E Test 應該最少？"
+    hints:
+      - "想想每種測試的速度、可靠度和維護成本"
+    pass_criteria: "Unit Test：速度快（毫秒）、可靠度高、維護成本低，適合大量使用來覆蓋各種邏輯分支。E2E Test：速度慢（分鐘）、容易因環境問題而 flaky、維護成本高，只用來驗證關鍵的完整流程"
+
+  - id: "14-core-2"
+    type: concept
+    question: "AAA 模式（Arrange-Act-Assert）是什麼？為什麼每個測試案例應該只有一個 Act？"
+    hints:
+      - "如果一個測試有兩個 Act，失敗時你知道是哪一步出錯嗎？"
+    pass_criteria: "Arrange：準備測試資料和依賴。Act：執行被測試的操作。Assert：驗證結果是否符合預期。每個測試只有一個 Act 才能精確定位失敗原因，測試名稱也能清楚描述在測什麼情境"
+
+  - id: "14-core-3"
+    type: scenario
+    question: "本專案用手寫 Mock 而非 Mock 框架（gomock、mockery）。在什麼情況下手寫 Mock 會變得不實際？"
+    hints:
+      - "如果一個介面有 20 個方法呢？"
+    pass_criteria: "當介面方法很多時（>5-10 個），手寫 Mock 很繁瑣。Go 的介面通常方法很少所以手寫可行，但如果介面膨脹就該考慮框架或重構介面（Interface Segregation Principle——拆成更小的介面）"
+
+  - id: "14-core-4"
+    type: concept
+    question: "Table-Driven Tests 是什麼？相比為每個案例寫獨立的函式，有什麼好處？"
+    hints:
+      - "新增一個測試案例需要做什麼？"
+    pass_criteria: "用一個 struct slice 列出所有測試案例（輸入 + 預期結果），用迴圈 + t.Run() 逐一執行。好處：新增案例只需加一行到表格，不需寫新函式；測試結構統一，容易閱讀和維護；共用 Arrange/Assert 邏輯，減少重複程式碼"

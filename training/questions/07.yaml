@@ -1,0 +1,23 @@
+chapter: "07"
+title: "Infrastructure Layer"
+questions:
+  - id: "07-core-1"
+    type: concept
+    question: "為什麼本專案使用環境變數來管理設定，而不是設定檔（如 config.json）？"
+    hints:
+      - "想想 Docker 和 Kubernetes 怎麼傳設定給容器"
+    pass_criteria: "提到 12-Factor App 建議設定存在環境中。Docker/Kubernetes 原生支援環境變數注入。不同環境（開發/測試/正式）只需切換環境變數，不需改程式碼或維護多份設定檔"
+
+  - id: "07-core-2"
+    type: scenario
+    question: "main.go 是整個服務的「組裝點」。請描述啟動流程的順序，以及為什麼這個順序很重要。"
+    hints:
+      - "如果 Handler 在 MongoDB 連線之前就被建立，會發生什麼？"
+    pass_criteria: "順序：1) 載入設定 2) 建立基礎設施連線（MongoDB, Redis）3) 建立 DI Container（組裝 Repository → UseCase → Handler）4) 建立路由 5) 啟動伺服器。順序重要因為每一步都依賴前一步的產物，例如 Repository 需要 DB 連線，UseCase 需要 Repository"
+
+  - id: "07-core-3"
+    type: concept
+    question: "Infrastructure Layer 是「最外層」，可以依賴所有內層。但為什麼 MongoDB 的連線建立（mongodb/client.go）和使用 MongoDB 的 Repository（adapter/out/repository/）要分開放？"
+    hints:
+      - "連線建立是「基礎設施」，使用連線做 CRUD 是「轉接」，它們的變更原因一樣嗎？"
+    pass_criteria: "分開是因為職責不同：mongodb/client.go 負責建立和管理連線（基礎設施），Repository 負責使用連線做業務相關的 CRUD 操作（轉接）。連線設定變了（如換連線池大小）不需要改 Repository，業務查詢變了不需要改連線邏輯"

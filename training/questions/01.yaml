@@ -1,0 +1,33 @@
+chapter: "01"
+title: "專案總覽"
+questions:
+  - id: "01-core-1"
+    type: concept
+    question: "KFC 平台為什麼選擇微服務架構而非單體應用？請說出至少兩個原因。"
+    hints:
+      - "想想看當遊戲流量暴增時，單體架構會遇到什麼問題"
+      - "再想想多人協作開發時，單體架構有什麼不便"
+    pass_criteria: "提到獨立部署/擴展、團隊獨立開發、故障隔離中的至少兩項"
+
+  - id: "01-core-2"
+    type: scenario
+    question: "如果 gameservice 需要知道某款遊戲的 RTP 設定被更新了，它是怎麼得知的？請描述完整的資料流。"
+    hints:
+      - "看看 config-service 的職責是什麼"
+      - "想想 SSE 在這裡扮演什麼角色"
+    pass_criteria: "描述出 admin-backend 修改 MongoDB → config-service 透過 Change Stream 偵測變更 → 透過 SSE 推播 → gameservice 收到更新的流程"
+
+  - id: "01-core-3"
+    type: comparison
+    question: "admin-backend 用 HTTP，gameservice 用 gRPC，為什麼不統一用一種協定？"
+    hints:
+      - "想想兩個服務各自面對的使用者是誰"
+      - "瀏覽器可以直接呼叫 gRPC 嗎？"
+    pass_criteria: "提到 admin-backend 面向前端瀏覽器適合 HTTP REST，gameservice 是服務間高頻內部通訊適合 gRPC 的效能優勢（二進位傳輸、型別安全）"
+
+  - id: "01-core-4"
+    type: scenario
+    question: "如果今天要新增一款遊戲，會涉及哪些服務？各自負責什麼？"
+    hints:
+      - "管理員在哪裡操作？操作完後其他服務怎麼知道？"
+    pass_criteria: "提到 admin-backend（管理員透過前端建立遊戲）→ 寫入 MongoDB → config-service 偵測變更並推播 → gameservice 更新內部快取"

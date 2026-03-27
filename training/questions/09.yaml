@@ -1,0 +1,24 @@
+chapter: "09"
+title: "API 設計與 Middleware"
+questions:
+  - id: "09-core-1"
+    type: concept
+    question: "Gin 的 Middleware 中 c.Next() 和 c.Abort() 各自的作用是什麼？如果忘記呼叫 c.Next() 會怎樣？"
+    hints:
+      - "想想 Middleware 是一個鏈條，c.Next() 是往下走"
+    pass_criteria: "c.Next() 繼續執行下一個 Middleware 或 Handler。c.Abort() 中斷鏈條，不再執行後續 Middleware。忘記呼叫 c.Next() 會導致請求停在這個 Middleware，Handler 永遠不會被執行"
+
+  - id: "09-core-2"
+    type: scenario
+    question: "JWT Middleware 驗證完 Token 後，用 c.Set('userID', claims.UserID) 把資訊存入 Context。為什麼不直接把 Token 傳給 Handler，讓 Handler 自己解析？"
+    hints:
+      - "如果有 10 個 Handler 都需要 userID，每個都自己解析 Token？"
+    pass_criteria: "Middleware 做一次驗證和解析，所有 Handler 都可以直接用 c.Get('userID') 取得。避免重複程式碼，確保驗證邏輯統一。職責分離：Middleware 負責認證，Handler 只需專注業務邏輯"
+
+  - id: "09-core-3"
+    type: code_review
+    question: "Audit Log Middleware 使用 goroutine 非同步記錄日誌。這樣做有什麼好處和潛在風險？"
+    hints:
+      - "想想如果同步記錄，對回應時間有什麼影響"
+      - "goroutine 裡面的錯誤，主請求能知道嗎？"
+    pass_criteria: "好處：不會阻塞 HTTP 回應，使用者不需要等日誌寫入完成。風險：goroutine 裡的錯誤不會回傳給使用者，日誌寫入可能靜默失敗。另外 goroutine 使用了 context.Background() 而非請求的 Context，因為請求可能已經結束"

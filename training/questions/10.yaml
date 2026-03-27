@@ -1,0 +1,23 @@
+chapter: "10"
+title: "資料庫與 Repository"
+questions:
+  - id: "10-core-1"
+    type: concept
+    question: "Repository 的 FindByID 在找不到資料時回傳 (nil, nil) 而非 error。為什麼這樣設計？"
+    hints:
+      - "「找不到資料」和「資料庫出錯」是同一種情況嗎？"
+    pass_criteria: "找不到資料是正常的業務情況（使用者可能查了一個不存在的 ID），不算錯誤。真正的 error 是資料庫連線斷了、查詢語法錯誤等技術問題。呼叫者可以用 if result == nil 判斷是否存在，用 if err != nil 判斷是否出錯"
+
+  - id: "10-core-2"
+    type: scenario
+    question: "本專案的 Redis 只用在登入限流，而不是用來快取 MongoDB 的查詢結果。為什麼？"
+    hints:
+      - "想想 admin-backend 的使用量和即時性需求"
+    pass_criteria: "admin-backend 是管理後台，使用量不高，不需要快取來提升查詢效能。登入限流需要極高的讀寫速度和 TTL（自動過期）功能，Redis 原生支援這些特性。不必要的快取反而增加資料一致性的複雜度"
+
+  - id: "10-core-3"
+    type: concept
+    question: "MongoDB 的 Change Streams 在 config-service 中扮演什麼角色？它和輪詢（Polling）相比有什麼優勢？"
+    hints:
+      - "想想 gameservice 需要多快知道設定變更了"
+    pass_criteria: "Change Streams 讓 config-service 即時監聽 MongoDB 的資料變更，一有更新就透過 SSE 推播。相比輪詢：零無效請求、即時通知（不需等待輪詢間隔）、降低資料庫負載"

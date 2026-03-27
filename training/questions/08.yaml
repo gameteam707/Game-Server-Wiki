@@ -1,0 +1,23 @@
+chapter: "08"
+title: "依賴注入"
+questions:
+  - id: "08-core-1"
+    type: comparison
+    question: "「自己建立依賴」和「依賴注入」有什麼差別？為什麼後者更好？"
+    hints:
+      - "如果 UseCase 自己 new 一個 MongoRepository，測試時怎麼辦？"
+    pass_criteria: "自己建立依賴：UseCase 內部直接建立 MongoRepository，造成緊耦合，無法用 Mock 測試。依賴注入：從外部傳入介面，UseCase 不知道具體實作，可以注入 Mock 測試，也容易替換實作"
+
+  - id: "08-core-2"
+    type: concept
+    question: "本專案選擇手動 DI（Container Pattern）而非 DI 框架（如 Wire、Dig），原因是什麼？"
+    hints:
+      - "想想可讀性和錯誤檢測時機"
+    pass_criteria: "手動 DI 程式碼明確一目了然、編譯時就能檢查錯誤、沒有額外依賴。對中小型專案，可讀性優勢大於框架的自動化便利性"
+
+  - id: "08-core-3"
+    type: scenario
+    question: "DI Container 的組裝順序是「由內而外」。如果你把 UseCase 的建立放在 Repository 之前，會發生什麼？"
+    hints:
+      - "UseCase 的建構函式需要什麼參數？"
+    pass_criteria: "會編譯失敗或 panic，因為 UseCase 的建構函式需要 Repository 介面作為參數。組裝順序必須是：基礎設施連線 → Repository（Adapter/out）→ UseCase → Handler（Adapter/in）→ Router"

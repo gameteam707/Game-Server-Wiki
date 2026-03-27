@@ -1,0 +1,23 @@
+chapter: "12"
+title: "可觀測性"
+questions:
+  - id: "12-core-1"
+    type: concept
+    question: "可觀測性的三大支柱是什麼？它們各自回答什麼問題？"
+    hints:
+      - "Logs、Metrics、Traces 各自的用途"
+    pass_criteria: "Logs（日誌）：發生了什麼事。Metrics（指標）：系統目前的數字是多少（如請求數、延遲）。Traces（追蹤）：一個請求經過了哪些服務、各花了多少時間"
+
+  - id: "12-core-2"
+    type: comparison
+    question: "結構化日誌（slog）和 fmt.Printf 有什麼差異？為什麼生產環境要用結構化日誌？"
+    hints:
+      - "如果你想在幾百萬行日誌中找到某個 sessionId 的紀錄，哪種格式比較容易搜尋？"
+    pass_criteria: "結構化日誌輸出 JSON 格式的 key-value，可以被 Loki/ELK 等工具索引和搜尋。fmt.Printf 輸出純文字，難以自動解析和搜尋。生產環境需要快速定位問題，結構化日誌的可搜尋性是必要的"
+
+  - id: "12-core-3"
+    type: concept
+    question: "Prometheus 的 Counter、Gauge、Histogram 三種指標類型各適合記錄什麼？"
+    hints:
+      - "有些數字只會往上加，有些會上下變動，有些需要看分佈"
+    pass_criteria: "Counter：只增不減的累計值，如請求總數、錯誤數。Gauge：可增可減的即時值，如當前連線數、佇列長度。Histogram：數值的分佈，如請求延遲（可以看 P50/P95/P99）"

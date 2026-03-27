@@ -1,0 +1,40 @@
+chapter: "02"
+title: "Clean Architecture 核心概念"
+questions:
+  - id: "02-core-1"
+    type: concept
+    question: "Clean Architecture 最重要的一條規則是什麼？這條規則解決了什麼問題？"
+    hints:
+      - "回想同心圓圖中箭頭的方向"
+    pass_criteria: "說出依賴方向只能由外向內，內層不知道外層的存在。解決了業務邏輯耦合框架/資料庫的問題，使得換框架或換資料庫時業務邏輯不需要修改"
+
+  - id: "02-core-2"
+    type: scenario
+    question: "一段「檢查遊戲名稱是否重複」的邏輯，應該放在哪一層？為什麼？"
+    hints:
+      - "問自己：如果今天從 Gin 換成 Echo，或從 MongoDB 換成 PostgreSQL，這段邏輯還需要嗎？"
+    pass_criteria: "放在 UseCase 層。因為這是業務規則，不管換什麼框架或資料庫，名稱不能重複這個規則都不變"
+
+  - id: "02-core-3"
+    type: code_review
+    question: |
+      以下程式碼有什麼架構問題？
+      ```go
+      func CreateGame(c *gin.Context) {
+          var req struct { Name string `json:"name"` }
+          c.BindJSON(&req)
+          collection := mongoClient.Database("db").Collection("games")
+          collection.InsertOne(c, bson.M{"name": req.Name})
+          c.JSON(200, gin.H{"success": true})
+      }
+      ```
+    hints:
+      - "這個函式同時做了幾件事？各自屬於哪一層？"
+    pass_criteria: "指出職責混亂：HTTP 解析（Adapter）、業務邏輯（UseCase）、資料庫操作（Adapter/out）全部混在一個函式。違反依賴規則，無法單獨測試業務邏輯，換框架或資料庫要整個重寫"
+
+  - id: "02-core-4"
+    type: comparison
+    question: "Domain Entity 和 DTO 看起來欄位很像，為什麼不共用同一個 struct？"
+    hints:
+      - "想想兩者的「變更原因」是否相同"
+    pass_criteria: "提到變更原因不同：DTO 跟隨 API 規格變化，Entity 跟隨業務規則變化。共用會導致改 API 欄位名時影響到 Domain 層"

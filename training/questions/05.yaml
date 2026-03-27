@@ -1,0 +1,38 @@
+chapter: "05"
+title: "UseCase Layer"
+questions:
+  - id: "05-core-1"
+    type: concept
+    question: "UseCase 目錄下有三個核心檔案：contract.go、ports/*.go、uc.go。它們各自的職責是什麼？"
+    hints:
+      - "想想「對外宣告我能做什麼」vs「我需要什麼外部能力」vs「我怎麼做」"
+    pass_criteria: "contract.go：定義 UseCase 介面 + Command（輸入）+ Result（輸出），是對外的契約。ports/：定義 UseCase 需要的外部依賴介面（如 Repository），只有介面沒有實作。uc.go：業務邏輯的實際實作"
+
+  - id: "05-core-2"
+    type: concept
+    question: "什麼是「依賴反轉 (Dependency Inversion)」？在 UseCase 和 Repository 的關係中是怎麼體現的？"
+    hints:
+      - "傳統做法是 UseCase 直接依賴 MongoRepository，依賴反轉後呢？"
+    pass_criteria: "UseCase 定義介面（Port），Repository 實作介面。UseCase 不知道實際用的是 MongoDB 還是 PostgreSQL。高層模組（UseCase）不依賴低層模組（Repository 實作），兩者都依賴抽象（Port 介面）"
+
+  - id: "05-core-3"
+    type: code_review
+    question: |
+      以下 UseCase Command 的定義有什麼問題？
+      ```go
+      type CreateCommand struct {
+          GameCode string `json:"game_code"`
+          Names    bson.M
+      }
+      ```
+    hints:
+      - "Command 屬於 UseCase 層，它應該依賴什麼？"
+    pass_criteria: "兩個問題：1) json tag 是 HTTP 層的關注點，不該出現在 UseCase 的 Command 中。2) bson.M 是 MongoDB 的型別，UseCase 不應該依賴資料庫套件。Command 應該使用純粹的業務語言定義"
+
+  - id: "05-core-4"
+    type: scenario
+    question: "Auth Login UseCase 同時依賴了 AdminUserRepository 和 LoginLimiter 兩個 Port。為什麼不把限流邏輯直接寫在 UseCase 裡面，而是抽成 Port？"
+    hints:
+      - "想想限流的實作可能用 Redis，也可能用 in-memory，UseCase 應該知道嗎？"
+      - "如果要測試登入邏輯但不想啟動 Redis，該怎麼辦？"
+    pass_criteria: "抽成 Port 的好處：1) UseCase 不知道限流用什麼技術實作（Redis/in-memory）。2) 測試時可以注入 Mock，不需要真的 Redis。3) 未來換限流方案只需要寫新的實作，UseCase 不用改"

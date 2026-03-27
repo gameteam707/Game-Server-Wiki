@@ -1,0 +1,23 @@
+chapter: "13"
+title: "部署與容器化"
+questions:
+  - id: "13-core-1"
+    type: concept
+    question: "Docker 多階段建置（Multi-stage Build）為什麼能大幅縮小映像大小？兩個階段各做什麼？"
+    hints:
+      - "Go SDK 本身就有好幾百 MB"
+    pass_criteria: "第一階段（builder）：使用完整的 Go SDK 編譯程式碼。第二階段（runtime）：只複製編譯好的二進位檔到精簡的 Alpine 映像。最終映像不包含 Go SDK 和原始碼，只有約 20MB（vs ~1GB）"
+
+  - id: "13-core-2"
+    type: concept
+    question: "Kubernetes 的 Deployment 和 Service 各自的職責是什麼？為什麼需要 Service？"
+    hints:
+      - "Pod 的 IP 是會變的"
+    pass_criteria: "Deployment 管理 Pod 的副本數量、更新策略和自動修復。Service 提供穩定的網路入口（固定 DNS 名稱），因為 Pod 可能被重啟、IP 會改變，Service 抽象了這個變動，讓其他服務用固定名稱存取"
+
+  - id: "13-core-3"
+    type: scenario
+    question: "Dockerfile 中為什麼先 COPY go.mod + go.sum 並 RUN go mod download，然後才 COPY 原始碼？而不是一次全部 COPY？"
+    hints:
+      - "Docker 的每一行指令都是一個快取層"
+    pass_criteria: "利用 Docker 的層快取機制。依賴檔案（go.mod/go.sum）不常改變，把它們放前面可以讓 go mod download 這一層被快取。只有原始碼改變時才需要重新編譯，不需要重新下載依賴，大幅加速建置速度"

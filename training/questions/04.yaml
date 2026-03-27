@@ -1,0 +1,24 @@
+chapter: "04"
+title: "Domain Layer"
+questions:
+  - id: "04-core-1"
+    type: concept
+    question: "Domain Entity 為什麼不能有 json 或 bson 等序列化標籤（struct tag）？"
+    hints:
+      - "想想 Entity 和「外部怎麼使用它」之間的關係"
+      - "如果 API 要改欄位名，應該影響到 Domain 層嗎？"
+    pass_criteria: "提到序列化標籤暗示 Entity 知道外部如何使用它，違反 Domain 層的獨立性。不同 Adapter 有不同的序列化需求（HTTP 用 camelCase JSON，DB 用 snake_case BSON），不應該把這些耦合在 Entity 上"
+
+  - id: "04-core-2"
+    type: comparison
+    question: "Entity 和 Value Object 有什麼區別？本專案中 GameStatus 是 Entity 還是 Value Object？"
+    hints:
+      - "想想 GameStatus 有沒有自己的 ID"
+    pass_criteria: "Entity 有唯一識別（ID），Value Object 沒有（用值本身區分）。GameStatus 是 Value Object（自訂型別 + 常數），它沒有 ID，靠值（active/inactive）來區分"
+
+  - id: "04-core-3"
+    type: concept
+    question: "本專案的 Domain Entity 採用「貧血模型」而非「充血模型」，兩者有什麼差異？各有什麼優缺點？"
+    hints:
+      - "想想業務邏輯放在 Entity 裡面 vs 放在 UseCase 裡面"
+    pass_criteria: "貧血模型：Entity 主要是資料載體，業務邏輯放在 UseCase。優點是結構簡單、容易理解，缺點是業務邏輯分散。充血模型：Entity 包含業務方法，優點是業務邏輯內聚，缺點是需要更深的 DDD 功力"

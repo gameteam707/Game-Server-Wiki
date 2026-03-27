@@ -1,0 +1,24 @@
+chapter: "03"
+title: "目錄結構與分層"
+questions:
+  - id: "03-core-1"
+    type: concept
+    question: "Go 語言中 `internal/` 目錄有什麼特殊意義？為什麼本專案把所有業務程式碼都放在 internal/ 下？"
+    hints:
+      - "想想如果其他服務可以直接 import 你的內部程式碼，會有什麼問題"
+    pass_criteria: "internal/ 目錄下的程式碼只能被同一個 module 的程式碼 import，是 Go 編譯器強制執行的規則。確保服務之間的邊界清晰，防止跨服務直接依賴內部實作"
+
+  - id: "03-core-2"
+    type: concept
+    question: "adapter/ 目錄下分成 in/ 和 out/，這兩者各自代表什麼？請各舉一個例子。"
+    hints:
+      - "想想資料流動的方向：誰在呼叫誰？"
+    pass_criteria: "in（入站）：外部世界呼叫系統，例如 HTTP Handler 接收 REST 請求。out（出站）：系統呼叫外部世界，例如 Repository 存取 MongoDB 或 Gateway 呼叫外部 API"
+
+  - id: "03-core-3"
+    type: scenario
+    question: "如果要為 admin-backend 新增一個「公告管理」功能，你需要在哪些目錄下新增檔案？請列出至少四個。"
+    hints:
+      - "回想新功能開發流程：Entity → UseCase → Adapter"
+      - "別忘了 DTO 和 DI Container"
+    pass_criteria: "至少提到：domain/entity/（公告 Entity）、usecase/announcement/（UseCase + contract + ports）、adapter/in/http/（Handler）、adapter/in/http/dto/（Request/Response DTO）、adapter/out/repository/mongo/（Repository 實作）。提到要更新 DI Container 更好"

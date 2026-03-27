@@ -1,0 +1,23 @@
+chapter: "06"
+title: "Adapter Layer"
+questions:
+  - id: "06-core-1"
+    type: concept
+    question: "HTTP Handler 的職責應該只有哪些步驟？如果在 Handler 裡面看到業務規則的判斷，代表什麼問題？"
+    hints:
+      - "回想 Handler 的四個 Step"
+    pass_criteria: "Handler 只做：1) 解析 HTTP Request 為 DTO 2) DTO 轉 UseCase Command 3) 呼叫 UseCase 4) Entity/Result 轉 Response DTO 回傳。如果有業務規則判斷（如檢查名稱是否重複），代表邏輯放錯地方了，應該在 UseCase 層"
+
+  - id: "06-core-2"
+    type: concept
+    question: "在本專案中，一個完整的 HTTP 請求會經過幾次資料轉換？請依序列出每次轉換涉及的資料結構。"
+    hints:
+      - "從 JSON 進來到存入 MongoDB，中間經過了幾個不同的 struct？"
+    pass_criteria: "至少描述出：HTTP JSON → Request DTO (json tag) → UseCase Command (無 tag) → Domain Entity (無 tag) → MongoDB Document (bson tag)，回程反向。每次轉換都是刻意的，確保每層的資料結構只服務自己的關注點"
+
+  - id: "06-core-3"
+    type: scenario
+    question: "Repository 的 toDocument() 和 toEntity() 轉換函式為什麼是必要的？如果直接讓 Entity 同時有 bson tag 不是更簡單嗎？"
+    hints:
+      - "想想 API 回傳的欄位名和資料庫存的欄位名是否總是一樣的"
+    pass_criteria: "轉換函式確保 Entity 保持純粹不依賴 MongoDB。不同 Adapter 可能有不同的命名慣例（API 用 camelCase，DB 用 snake_case）。若直接加 bson tag 在 Entity 上，改 DB 欄位名就會影響 Domain 層，違反依賴規則"

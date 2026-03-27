@@ -1,0 +1,23 @@
+chapter: "11"
+title: "微服務通訊"
+questions:
+  - id: "11-core-1"
+    type: comparison
+    question: "同步通訊（HTTP/gRPC）和非同步通訊（SSE/Kafka）各適合什麼場景？請各舉一個本專案中的例子。"
+    hints:
+      - "哪些操作需要立即得到結果？哪些可以稍後處理？"
+    pass_criteria: "同步：需要立即回應的場景，如 gameapi 透過 gRPC 呼叫 gameservice 的 Spin（玩家等著看結果）。非同步：不需要立即處理的場景，如 gameservice 透過 Kafka 發送下注事件給下游統計系統，或 config-service 透過 SSE 推播設定更新"
+
+  - id: "11-core-2"
+    type: concept
+    question: "Outbox Pattern 解決了什麼問題？如果不使用 Outbox，直接在業務操作後發 Kafka 訊息，會有什麼風險？"
+    hints:
+      - "如果 MongoDB 寫入成功但 Kafka 發送失敗呢？反過來呢？"
+    pass_criteria: "解決資料庫操作和訊息發送之間的一致性問題。不用 Outbox：DB 寫入成功但 Kafka 失敗 → 資料庫有紀錄但下游不知道；或 Kafka 成功但 DB 失敗 → 下游收到了不存在的資料。Outbox 把訊息和業務資料放在同一個 Transaction 中，由背景 Worker 負責發送"
+
+  - id: "11-core-3"
+    type: scenario
+    question: "gRPC 使用 Protocol Buffers 定義服務介面（.proto 檔案）。這和 HTTP REST 直接用 JSON 相比，在「型別安全」方面有什麼差異？"
+    hints:
+      - "JSON 的數字是 number，沒有 int 和 float 的區分，.proto 呢？"
+    pass_criteria: "Proto 有嚴格的型別定義（int32、double、string 等），編譯時就能檢查型別錯誤，client 和 server 共用同一份 .proto 定義確保一致。JSON 是動態的，欄位名打錯、型別不匹配只有在執行時才會發現"
